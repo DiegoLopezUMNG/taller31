@@ -264,3 +264,64 @@ function dibujarEscena() {
       for (let dy=-2; dy<=2; dy++)
         drawPixel(x+dx, y+dy, color);
   }
+function actualizarPanel(l, res, v) {
+
+    // Etiqueta de resultado
+    const estado = res.acepta
+      ? `<span style="color:#00e676">✔ ACEPTADA</span>`
+      : `<span style="color:#ff5252">✘ RECHAZADA</span>`;
+
+    // Códigos de región de los puntos originales
+    const c0 = assignCode(l.p1.x, l.p1.y, v);
+    const c1 = assignCode(l.p2.x, l.p2.y, v);
+
+    // Recorte (solo si acepta)
+    const recorteHTML = res.acepta
+      ? `<br><b>Recorte:</b><br>
+         pc1: <span style="color:#00e676">(${Math.floor(res.x0)}, ${Math.floor(res.y0)})</span><br>
+         pc2: <span style="color:#00e676">(${Math.floor(res.x1)}, ${Math.floor(res.y1)})</span>`
+      : `<br><span style="color:#ff5252">Segmento descartado.</span>`;
+
+    document.getElementById('coords').innerHTML =
+      `<b style="color:#7ecfff">${l.label}</b><br>
+       <span style="color:#888;font-size:.7rem">${l.desc}</span><br><br>
+
+       <b>Códigos de región:</b><br>
+       <div class="codigo-row">
+         p1: <span class="code-tag">${codeStr(c0)}</span>
+         p2: <span class="code-tag">${codeStr(c1)}</span>
+       </div><br>
+
+       <b>AND:</b> <span class="code-tag">${codeStr(c0 & c1)}</span>
+       &nbsp;<b>OR:</b> <span class="code-tag">${codeStr(c0 | c1)}</span><br><br>
+
+       <b>Resultado:</b> ${estado}<br><br>
+
+       <b>Línea:</b><br>
+       p1: <span style="color:#f0c040">(${l.p1.x}, ${l.p1.y})</span><br>
+       p2: <span style="color:#f0c040">(${l.p2.x}, ${l.p2.y})</span>
+
+       ${recorteHTML}`;
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  COMMIT 6 — Utilidades de navegación y lectura de ventana
+  // ════════════════════════════════════════════════════════════
+
+  /** Lee los valores del formulario y retorna la ventana de recorte. */
+  function getVentana() {
+    return {
+      xmin: parseInt(document.getElementById('xmin').value),
+      ymin: parseInt(document.getElementById('ymin').value),
+      xmax: parseInt(document.getElementById('xmax').value),
+      ymax: parseInt(document.getElementById('ymax').value),
+    };
+  }
+
+  function irA(i)      { escenaActual = i;                          dibujarEscena(); }
+  function siguiente() { if (escenaActual < lineas.length-1) { escenaActual++; dibujarEscena(); } }
+  function anterior()  { if (escenaActual > 0)               { escenaActual--; dibujarEscena(); } }
+  function actualizar(){ dibujarEscena(); }
+
+  // ── Punto de entrada ──
+  window.onload = dibujarEscena;
