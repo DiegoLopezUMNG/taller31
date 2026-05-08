@@ -42,4 +42,19 @@ const canvas = document.getElementById('canvas');
     // fillRect(x, y, 1, 1) → exactamente 1 píxel
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
   }
+
+   function assignCode(x, y, v) {
+    let code = 0;                      // empezamos con 0000
+
+    if (x < v.xmin) code |= 0b0001;   // LEFT   — fuera por la izquierda
+    if (x > v.xmax) code |= 0b0010;   // RIGHT  — fuera por la derecha
+    if (y > v.ymax) code |= 0b0100;   // BOTTOM — fuera por abajo (y↓)
+    if (y < v.ymin) code |= 0b1000;   // TOP    — fuera por arriba
+
+    return code; // retorna el código binario de 4 bits
+  }
+
+  function codeStr(code) {
+    return code.toString(2).padStart(4, '0');
+  }
   
