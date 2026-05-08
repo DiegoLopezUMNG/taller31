@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cohen-Sutherland</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      font-family: 'Courier New', monospace;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+      gap: 16px;
+    }
+
+    h1 { color: #7ecfff; font-size: 1rem; letter-spacing: .15em; text-transform: uppercase; }
+
+    #main { display: flex; gap: 24px; align-items: flex-start; }
+
+    canvas { background: #000; border: 1px solid #2a4a6a; display: block; }
+
+    #panel { width: 230px; display: flex; flex-direction: column; gap: 10px; }
+
+    .box {
+      border: 1px solid #2a4a6a;
+      padding: 10px;
+      border-radius: 3px;
+      font-size: .76rem;
+      line-height: 1.8;
+    }
+
+    .box h3 { color: #7ecfff; margin-bottom: 6px; font-size: .79rem; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+
+    label { color: #aaa; font-size: .73rem; }
+
+    input[type=number] {
+      background: #111;
+      border: 1px solid #2a4a6a;
+      color: #7ecfff;
+      padding: 3px 6px;
+      font-family: 'Courier New', monospace;
+      font-size: .73rem;
+      width: 100%;
+      border-radius: 2px;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid #2a6a9a;
+      color: #7ecfff;
+      padding: 5px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: .76rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background .2s;
+    }
+    button:hover { background: #0a2a3a; }
+
+    #nav { display: flex; gap: 5px; justify-content: center; }
+
+    /* Leyenda de colores */
+    .leyenda { display: flex; flex-direction: column; gap: 4px; }
+    .ley-item { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: #aaa; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Códigos de región en el panel */
+    .codigo-row { display: flex; justify-content: space-between; }
+    .code-tag {
+      background: #0a1a2a;
+      border: 1px solid #2a4a6a;
+      border-radius: 2px;
+      padding: 1px 5px;
+      font-size: .7rem;
+      color: #f0c040;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Algoritmo de Cohen-Sutherland — Recorte de Líneas</h1>
+
+<div id="main">
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <div id="panel">
+
+    <!-- ── Ventana de recorte ── -->
+    <div class="box">
+      <h3>Ventana de recorte</h3>
+      <div class="grid2">
+        <label>x<sub>min</sub></label><label>y<sub>min</sub></label>
+        <input id="xmin" type="number" value="100">
+        <input id="ymin" type="number" value="100">
+        <label>x<sub>max</sub></label><label>y<sub>max</sub></label>
+        <input id="xmax" type="number" value="380">
+        <input id="ymax" type="number" value="380">
+      </div>
+      <br>
+      <button onclick="actualizar()">Actualizar</button>
+    </div>
+
+    <!-- ── Navegación ── -->
+    <div class="box">
+      <h3>Escena</h3>
+      <div id="nav">
+        <button onclick="irA(0)">|&lt;</button>
+        <button onclick="anterior()">&lt;</button>
+        <button onclick="siguiente()">&gt;</button>
+        <button onclick="irA(lineas.length-1)">&gt;|</button>
+      </div>
+      <br>
+      <div id="escena-label" style="text-align:center;color:#aaa;font-size:.74rem;">Escena 1 / 5</div>
+    </div>
+
+    <!-- ── Info línea y recorte ── -->
+    <div class="box" id="coords">cargando...</div>
+
+    <!-- ── Leyenda ── -->
+    <div class="box">
+      <h3>Leyenda</h3>
+      <div class="leyenda">
+        <div class="ley-item"><div class="dot" style="background:#4ab8e8"></div> Ventana de recorte</div>
+        <div class="ley-item"><div class="dot" style="background:#444"></div> Línea original</div>
+        <div class="ley-item"><div class="dot" style="background:#00e676"></div> Segmento aceptado</div>
+        <div class="ley-item"><div class="dot" style="background:#ff5252"></div> Segmento rechazado</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
