@@ -138,3 +138,46 @@ const canvas = document.getElementById('canvas');
     }
   }
   
+  // traza el rectángulo de la ventana de recorte píxel a píxel.
+  //  Internamente usa Bresenham para cada arista.
+  //  Recibe la ventana y el contexto, no retorna nada visible
+  //  pero pinta las 4 aristas del viewport en el canvas.
+
+  function drawViewport(v, color = '#4ab8e8') {
+
+    /**
+     * Traza un segmento de (ax,ay) a (bx,by) pixel a pixel
+     * usando Bresenham (interno a drawViewport).
+     */
+    function segmento(ax, ay, bx, by) {
+      ax=Math.floor(ax); ay=Math.floor(ay);
+      bx=Math.floor(bx); by=Math.floor(by);
+      let dx=Math.abs(bx-ax), dy=Math.abs(by-ay);
+      let sx=ax<bx?1:-1,      sy=ay<by?1:-1;
+      let p=(dx>=dy)?(2*dy-dx):(2*dx-dy);
+      let x=ax, y=ay;
+      if (dx >= dy) {
+        for (let i=0;i<=dx;i++) {
+          drawPixel(x,y,color);
+          if(p>=0){y+=sy;p+=2*dy-2*dx;}else{p+=2*dy;}
+          x+=sx;
+        }
+      } else {
+        for (let i=0;i<=dy;i++) {
+          drawPixel(x,y,color);
+          if(p>=0){x+=sx;p+=2*dx-2*dy;}else{p+=2*dx;}
+          y+=sy;
+        }
+      }
+    }
+
+    // Las 4 aristas del rectángulo de recorte
+    segmento(v.xmin, v.ymin, v.xmax, v.ymin); // arriba
+    segmento(v.xmax, v.ymin, v.xmax, v.ymax); // derecha
+    segmento(v.xmin, v.ymax, v.xmax, v.ymax); // abajo
+    segmento(v.xmin, v.ymin, v.xmin, v.ymax); // izquierda
+  }
+
+  
+
+
