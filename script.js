@@ -214,4 +214,53 @@ const canvas = document.getElementById('canvas');
     }
   }
 
+function dibujarEscena() {
+    // 1. Limpiar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const v = getVentana();           // leer ventana de recorte
+    const l = lineas[escenaActual];   // línea de la escena actual
+
+    // 2. Aplicar algoritmo Cohen-Sutherland
+    const res = cohenSutherland(l.p1.x, l.p1.y, l.p2.x, l.p2.y, v);
+
+    // 3. Línea ORIGINAL completa en gris (antes del recorte)
+    drawLine(l.p1.x, l.p1.y, l.p2.x, l.p2.y, '#404040');
+
+    // 4. Resultado del recorte
+    if (res.acepta) {
+      // Línea recortada en VERDE
+      drawLine(res.x0, res.y0, res.x1, res.y1, '#00e676');
+    }
+    // Si rechaza: no se dibuja nada adicional (línea queda en gris)
+
+    // 5. Ventana de recorte encima (para que tape lo que esté detrás)
+    drawViewport(v, '#4ab8e8');
+
+    // 6. Marcar los puntos p1 y p2 originales (pequeño cuadradito)
+    marcaPunto(l.p1.x, l.p1.y, '#aaaaaa');
+    marcaPunto(l.p2.x, l.p2.y, '#aaaaaa');
+
+    // Si acepta, marcar también los puntos del segmento recortado
+    if (res.acepta) {
+      marcaPunto(res.x0, res.y0, '#00e676');
+      marcaPunto(res.x1, res.y1, '#00e676');
+    }
+
+    // Actualizar UI
+    document.getElementById('escena-label').textContent =
+      `Escena ${escenaActual+1} / ${lineas.length}`;
+
+    actualizarPanel(l, res, v);
+  }
+
+  /**
+   * Dibuja una pequeña marca (cruz 3×3) en un punto.
+   * Usa solo drawPixel — sin métodos de canvas.
+   */
+  function marcaPunto(x, y, color) {
+    x = Math.floor(x); y = Math.floor(y);
+    for (let dx=-2; dx<=2; dx++)
+      for (let dy=-2; dy<=2; dy++)
+        drawPixel(x+dx, y+dy, color);
+  }
