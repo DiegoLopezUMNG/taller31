@@ -304,9 +304,6 @@ function actualizarPanel(l, res, v) {
        ${recorteHTML}`;
   }
 
-  // ════════════════════════════════════════════════════════════
-  //  COMMIT 6 — Utilidades de navegación y lectura de ventana
-  // ════════════════════════════════════════════════════════════
 
   /** Lee los valores del formulario y retorna la ventana de recorte. */
   function getVentana() {
