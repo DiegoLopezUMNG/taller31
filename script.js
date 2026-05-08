@@ -178,6 +178,40 @@ const canvas = document.getElementById('canvas');
     segmento(v.xmin, v.ymin, v.xmin, v.ymax); // izquierda
   }
 
-  
+  //Traza una línea arbitraria píxel a píxel con Bresenham
+  //  (soporta todos los octantes).
+  //  Es la única función usada para dibujar líneas.
+
+    function drawLine(x0, y0, x1, y1, color = '#ffffff') {
+    x0=Math.floor(x0); y0=Math.floor(y0);
+    x1=Math.floor(x1); y1=Math.floor(y1);
+
+    let dx=Math.abs(x1-x0), dy=Math.abs(y1-y0);
+    let sx=x0<x1?1:-1,      sy=y0<y1?1:-1;
+
+    // p inicial: depende del eje conductor
+    // Si |Δx| >= |Δy| → conducimos en X, p0 = 2·dy - dx
+    // Si |Δy| >  |Δx| → conducimos en Y, p0 = 2·dx - dy
+    let p=(dx>=dy)?(2*dy-dx):(2*dx-dy);
+    let x=x0, y=y0;
+
+    if (dx >= dy) {
+      // Eje conductor X (pendiente suave)
+      for (let i=0;i<=dx;i++) {
+        drawPixel(x,y,color);
+        // p >= 0 → mover también en Y (diagonal)
+        // p < 0  → solo avanzar en X (horizontal)
+        if(p>=0){y+=sy;p+=2*dy-2*dx;}else{p+=2*dy;}
+        x+=sx;
+      }
+    } else {
+      // Eje conductor Y (pendiente pronunciada)
+      for (let i=0;i<=dy;i++) {
+        drawPixel(x,y,color);
+        if(p>=0){x+=sx;p+=2*dx-2*dy;}else{p+=2*dx;}
+        y+=sy;
+      }
+    }
+  }
 
 
