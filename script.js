@@ -57,4 +57,84 @@ const canvas = document.getElementById('canvas');
   function codeStr(code) {
     return code.toString(2).padStart(4, '0');
   }
+
+  function cohenSutherland(x0, y0, x1, y1, v) {
+
+    // Códigos de región iniciales de cada extremo
+    let c0 = assignCode(x0, y0, v);
+    let c1 = assignCode(x1, y1, v);
+
+    // Guardamos los códigos originales para mostrar en el panel
+    const c0orig = c0;
+    const c1orig = c1;
+
+    // Iteramos hasta aceptar o rechazar la línea
+    while (true) {
+
+      // ── Paso 2: Aceptación trivial ──
+      // Si ambos códigos son 0000, la línea está completamente dentro
+      if ((c0 | c1) === 0) {
+        // Retornamos los puntos (posiblemente ya recortados)
+        return { acepta: true, x0, y0, x1, y1, c0: c0orig, c1: c1orig };
+      }
+
+      // ── Paso 3: Rechazo trivial ──
+      // Si el AND de ambos códigos != 0, ambos están del mismo lado
+      if ((c0 & c1) !== 0) {
+        return { acepta: false, x0, y0, x1, y1, c0: c0orig, c1: c1orig };
+      }
+
+      // ── Paso 4: Intersección ──
+      // Elegimos el punto que está fuera (código != 0)
+      // Usamos c0; si c0==0 usamos c1.
+      let cOut = (c0 !== 0) ? c0 : c1;
+
+      let xi, yi; // punto de intersección con el borde
+
+      // Calculamos la pendiente para la fórmula de intersección
+      // Evitamos división por cero con un pequeño delta
+      let dx = x1 - x0;
+      let dy = y1 - y0;
+
+      // Determinamos con qué borde intersecta cOut
+      // Orden: TOP → BOTTOM → RIGHT → LEFT
+
+      if (cOut & 0b1000) {
+        // Borde SUPERIOR (y < ymin): intersecta con y = ymin
+        // x = x0 + dx * (ymin - y0) / dy
+        yi = v.ymin;
+        xi = x0 + dx * (v.ymin - y0) / dy;
+
+      } else if (cOut & 0b0100) {
+        // Borde INFERIOR (y > ymax): intersecta con y = ymax
+        // x = x0 + dx * (ymax - y0) / dy
+        yi = v.ymax;
+        xi = x0 + dx * (v.ymax - y0) / dy;
+
+      } else if (cOut & 0b0010) {
+        // Borde DERECHO (x > xmax): intersecta con x = xmax
+        // y = y0 + dy * (xmax - x0) / dx
+        xi = v.xmax;
+        yi = y0 + dy * (v.xmax - x0) / dx;
+
+      } else {
+        // Borde IZQUIERDO (x < xmin): intersecta con x = xmin
+        // y = y0 + dy * (xmin - x0) / dx
+        xi = v.xmin;
+        yi = y0 + dy * (v.xmin - x0) / dx;
+      }
+
+      // Reemplazamos el punto externo por el punto de intersección
+      if (cOut === c0) {
+        // p0 estaba fuera → lo movemos a la intersección
+        x0 = xi; y0 = yi;
+        c0 = assignCode(x0, y0, v); // recalculamos su código
+      } else {
+        // p1 estaba fuera → lo movemos a la intersección
+        x1 = xi; y1 = yi;
+        c1 = assignCode(x1, y1, v); // recalculamos su código
+      }
+      // El while vuelve a evaluar con los nuevos puntos
+    }
+  }
   
